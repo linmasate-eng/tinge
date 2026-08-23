@@ -10,11 +10,15 @@
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; box-sizing: border-box; }
         h2 { margin: 0 0 15px 0; color: #007bff; font-size: 18px; text-align: center; }
         
-        /* 改用 textarea 支持多行输入 */
         textarea, input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; font-family: inherit; }
         textarea { resize: none; height: 120px; }
         
         button.add-btn { width: 100%; padding: 14px; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button.add-btn:active { background: #0056b3; }
+
+        /* 一键清空按钮样式 */
+        button.clear-btn { width: 100%; padding: 10px; background: #dc3545; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        button.clear-btn:active { background: #bd2130; }
         
         .history-list { width: 100%; max-width: 400px; margin-top: 20px; }
         .item { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
@@ -38,6 +42,8 @@
         <textarea id="phone" placeholder="输入会员手机号，多个号码请换行&#10;例如：&#10;13800000001&#10;13800000002"></textarea>
         <input type="text" id="note" placeholder="统一备注 (选填，如：VIP批次)">
         <button class="add-btn" onclick="saveAndRender()">生成并保存</button>
+        <!-- 新增：一键清除所有会员按钮 -->
+        <button class="clear-btn" onclick="clearAllItems()">一键清除所有会员</button>
     </div>
 
     <div id="list" class="history-list"></div>
@@ -85,49 +91,12 @@
             renderList();
         }
 
-        function renderList() {
-            let history = JSON.parse(localStorage.getItem('my_qr_list') || '[]');
-            let listDiv = document.getElementById('list');
-            listDiv.innerHTML = ""; 
-
-            history.forEach(item => {
-                let div = document.createElement('div');
-                div.className = 'item';
-                let qrId = "qr-" + item.id;
-                
-                // 增加了 <span class="serial-badge">NO.${item.serial}</span>
-                div.innerHTML = `
-                    <button class="btn-del" onclick="deleteItem(${item.id})">×</button>
-                    <div class="item-info">
-                        <div class="item-note">
-                            <span class="serial-badge">NO.${item.serial || 0}</span>${item.note}
-                        </div>
-                        <div class="item-phone">${item.content}</div>
-                    </div>
-                    <div id="${qrId}" class="qr-box"></div>
-                `;
-                
-                listDiv.appendChild(div);
-
-                new QRCode(document.getElementById(qrId), {
-                    text: item.content,
-                    width: 160,
-                    height: 160,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-            });
-        }
-
+        // 删除单条记录
         function deleteItem(id) {
-            if(confirm("确定删除这个二维码吗？")) {
-                let history = JSON.parse(localStorage.getItem('my_qr_list') || '[]');
-                history = history.filter(item => item.id !== id);
-                localStorage.setItem('my_qr_list', JSON.stringify(history));
-                renderList();
-            }
+            let history = JSON.parse(localStorage.getItem('my_qr_list') || '[]');
+            history = history.filter(item => item.id !== id);
+            localStorage.setItem('my_qr_list', JSON.stringify(history));
+            renderList();
         }
-    </script>
-</body>
-</html>
+
+       
